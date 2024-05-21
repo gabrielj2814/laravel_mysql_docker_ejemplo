@@ -1,0 +1,58 @@
+version: "3.8"
+services:
+
+  api-app:
+    image: docker.io/bitnami/laravel:11
+    ports:
+      - '3001:8000'
+    environment:
+      - DB_HOST=db-mysql
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=1234
+      - DB_DATABASE=db_practica
+    volumes:
+      - .:/app
+    links:
+      - db-mysql
+
+  php:
+    build:
+      context: . 
+      dockerfile: Dockerfile 
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "9202:9000"
+
+  db-mysql:
+    image: mysql:8.1.0
+    ports:
+      - "3002:3306"
+    environment:
+      - MYSQL_DATABASE=db_practica
+      - MYSQL_ROOT_PASSWORD=1234
+    volumes:
+      - v-db-mysql:/var/lib/mysql
+
+
+  phpmyadmin:
+    image: phpmyadmin:5.2.1-apache
+    ports:
+      - "3003:80"
+    links:
+      - db-mysql
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db-mysql
+      - PMA_PORT=3306
+  
+  composer:
+    image: composer:2.7.6
+    volumes:
+      - .:/app
+    working_dir: /app
+
+
+volumes:
+  v-db-mysql:
